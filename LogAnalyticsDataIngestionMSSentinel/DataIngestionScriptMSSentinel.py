@@ -17,7 +17,6 @@ import re
 connection_string = os.environ['AzureWebJobsStorage']
 customer_id = os.environ['WorkspaceID']
 shared_key = os.environ['WorkspaceKey']
-KEY = os.environ["OnePassToken"]
 logAnalyticsUri = 'https://' + customer_id + '.ods.opinsights.azure.com'
 log_type = 'Test_DataIngestion'
 logAnalyticsUri = os.environ.get('logAnalyticsUri')
@@ -39,18 +38,6 @@ def build_signature(customer_id, shared_key, date, content_length, method, conte
     authorization = "SharedKey {}:{}".format(customer_id,encoded_hash)
     return authorization
 
-
-def generate_date():
-    current_time = datetime.datetime.utcnow().replace(second=0, microsecond=0)
-    state = StateManager(connection_string=connection_string)
-    past_time = state.get()
-    if past_time is not None:
-        logging.info("The last time point is: {}".format(past_time))
-    else:
-        logging.info("There is no last time point, trying to get events for last hour.")
-        past_time = (current_time - datetime.timedelta(minutes=60)).strftime("%Y-%m-%dT%H:%M:%SZ")
-    state.post(current_time.strftime("%Y-%m-%dT%H:%M:%SZ"))
-    return (past_time, current_time.strftime("%Y-%m-%dT%H:%M:%SZ"))
 
 def post_data(body):
     method = 'POST'
